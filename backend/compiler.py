@@ -1,6 +1,6 @@
-from executors.python_executor import run_python
-from executors.javascript_executor import run_javascript
-from executors.c_executor import run_c
+from backend.executors.python_executor import run_python
+from backend.executors.javascript_executor import run_javascript
+from backend.executors.c_executor import run_c
 
 def compile_code(language, code):
     if language == "python":

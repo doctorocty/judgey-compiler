@@ -3,7 +3,7 @@ from flask_cors import CORS
 
 import os
 
-from compiler import compile_code
+from backend.compiler import compile_code
 
 
 app = Flask(__name__)
