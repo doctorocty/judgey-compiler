@@ -4,7 +4,8 @@ import tempfile
 import os
 import json
 
-def analyze_python(code, temp_file):
+
+def analyze_python(temp_file):
     try:
         result = subprocess.run(
             [
@@ -14,23 +15,32 @@ def analyze_python(code, temp_file):
                 "check",
                 temp_file,
                 "--output-format",
-                "json"
+                "json",
+                "--select",
+                "F821"
             ],
             capture_output=True,
             text=True,
-            timeout=5
+            timeout=10
         )
 
-        if not result.stdout.strip():
-            return []
+        if result.stdout.strip():
+            try:
+                return json.loads(result.stdout), ""
+            except json.JSONDecodeError:
+                return [], result.stdout.strip()
 
-        try:
-            return json.loads(result.stdout)
-        except json.JSONDecodeError:
-            return []
+        if result.returncode != 0 and result.stderr.strip():
+            return [], result.stderr.strip()
 
-    except Exception:
-        return []
+        return [], ""
+
+    except subprocess.TimeoutExpired:
+        return [], "Ruff analysis timed out."
+
+    except Exception as error:
+        return [], str(error)
+
 
 def run_python(code):
     temp_file = None
@@ -45,10 +55,15 @@ def run_python(code):
             file.write(code)
             temp_file = file.name
 
-        issues = analyze_python(
-            code,
-            temp_file
-        )
+        issues, analyzer_error = analyze_python(temp_file)
+
+        if analyzer_error:
+            return {
+                "success": False,
+                "output": "",
+                "error": analyzer_error,
+                "errors": 1
+            }
 
         if issues:
             error_messages = []
@@ -57,7 +72,10 @@ def run_python(code):
                 location = issue.get("location", {})
                 row = location.get("row", "?")
                 column = location.get("column", "?")
-                message = issue.get("message", "Unknown error")
+                message = issue.get(
+                    "message",
+                    "Unknown error"
+                )
 
                 error_messages.append(
                     f"Line {row}, Column {column}: {message}"
@@ -71,7 +89,10 @@ def run_python(code):
             }
 
         result = subprocess.run(
-            [sys.executable, temp_file],
+            [
+                sys.executable,
+                temp_file
+            ],
             capture_output=True,
             text=True,
             timeout=5
