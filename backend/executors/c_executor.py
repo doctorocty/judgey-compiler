@@ -11,12 +11,16 @@ PROJECT_DIR = os.path.dirname(
     )
 )
 
-GCC_PATH = r"C:\msys64\ucrt64\bin\gcc.exe"
+BASH_PATH = r"C:\msys64\usr\bin\bash.exe"
+
+def windows_to_msys(path):
+    path = os.path.abspath(path)
+    drive = path[0].lower()
+    rest = path[2:].replace("\\", "/")
+    return f"/{drive}{rest}"
 
 def run_c(code):
     temp_dir = None
-    source_file = None
-    executable_file = None
 
     try:
         temp_dir = tempfile.mkdtemp(
@@ -41,20 +45,33 @@ def run_c(code):
         ) as file:
             file.write(code)
 
+        source_msys = windows_to_msys(source_file)
+        executable_msys = windows_to_msys(executable_file)
+
+        compile_command = (
+            f'gcc -fdiagnostics-color=never '
+            f'"{source_msys}" '
+            f'-o "{executable_msys}"'
+        )
+
         environment = os.environ.copy()
+        environment["MSYSTEM"] = "UCRT64"
+        environment["CHERE_INVOKING"] = "1"
 
         environment["PATH"] = (
-            r"C:\msys64\ucrt64\bin;"
+            r"C:\msys64\ucrt64\bin"
+            + ";"
+            + r"C:\msys64\usr\bin"
+            + ";"
             + environment.get("PATH", "")
         )
 
         compile_result = subprocess.run(
             [
-                GCC_PATH,
-                "-fdiagnostics-color=never",
-                source_file,
-                "-o",
-                executable_file
+                BASH_PATH,
+                "--login",
+                "-c",
+                compile_command
             ],
             capture_output=True,
             text=True,
@@ -64,7 +81,10 @@ def run_c(code):
         )
 
         if compile_result.returncode != 0:
-            error_output = compile_result.stderr.strip()
+            error_output = (
+                compile_result.stderr
+                or compile_result.stdout
+            ).strip()
 
             error_lines = re.findall(
                 r"(?m)^.*?:\d+:\d+:\s+error:.*$",
@@ -85,18 +105,16 @@ def run_c(code):
                 )
 
                 if match:
-                    line_number = match.group(1)
-                    column_number = match.group(2)
-                    message = match.group(3)
-
                     formatted_errors.append(
-                        f"Line {line_number}, Column {column_number}: {message}"
+                        f"Line {match.group(1)}, Column {match.group(2)}: {match.group(3)}"
                     )
                 else:
                     formatted_errors.append(line)
 
             if not formatted_errors:
-                formatted_errors.append(error_output)
+                formatted_errors.append(
+                    error_output or "C compilation failed."
+                )
 
             return {
                 "success": False,
@@ -105,9 +123,14 @@ def run_c(code):
                 "errors": error_count
             }
 
+        run_command = f'"{executable_msys}"'
+
         run_result = subprocess.run(
             [
-                executable_file
+                BASH_PATH,
+                "--login",
+                "-c",
+                run_command
             ],
             capture_output=True,
             text=True,
@@ -150,7 +173,10 @@ def run_c(code):
     finally:
         if temp_dir and os.path.exists(temp_dir):
             for filename in os.listdir(temp_dir):
-                filepath = os.path.join(temp_dir, filename)
+                filepath = os.path.join(
+                    temp_dir,
+                    filename
+                )
 
                 try:
                     os.remove(filepath)

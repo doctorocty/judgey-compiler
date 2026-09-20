@@ -1,5 +1,4 @@
 import subprocess
-import tempfile
 import os
 import json
 
@@ -11,11 +10,17 @@ PROJECT_DIR = os.path.dirname(
     )
 )
 
+NODE_PATH = r"C:\Program Files\nodejs\node.exe"
+
+if not os.path.exists(NODE_PATH):
+    NODE_PATH = "node"
+
 ESLINT_PATH = os.path.join(
     PROJECT_DIR,
     "node_modules",
-    ".bin",
-    "eslint.cmd"
+    "eslint",
+    "bin",
+    "eslint.js"
 )
 
 def analyze_javascript(code):
@@ -36,6 +41,7 @@ def analyze_javascript(code):
 
         result = subprocess.run(
             [
+                NODE_PATH,
                 ESLINT_PATH,
                 temp_file,
                 "--no-config-lookup",
@@ -48,32 +54,40 @@ def analyze_javascript(code):
             ],
             capture_output=True,
             text=True,
-            timeout=10,
+            timeout=30,
             cwd=PROJECT_DIR
         )
 
-        if not result.stdout.strip():
+        output = result.stdout.strip()
+
+        if not output:
             if result.stderr.strip():
                 return [{
                     "line": 1,
                     "column": 1,
                     "message": result.stderr.strip()
                 }]
-
             return []
 
-        data = json.loads(result.stdout)
+        data = json.loads(output)
 
         if not data:
             return []
 
         return data[0].get("messages", [])
 
+    except subprocess.TimeoutExpired:
+        return [{
+            "line": 1,
+            "column": 1,
+            "message": "JavaScript analysis timed out."
+        }]
+
     except Exception as error:
         return [{
             "line": 1,
             "column": 1,
-            "message": f"JavaScript analyzer error: {error}"
+            "message": str(error)
         }]
 
     finally:
@@ -123,7 +137,7 @@ def run_javascript(code):
 
         result = subprocess.run(
             [
-                "node",
+                NODE_PATH,
                 temp_file
             ],
             capture_output=True,
