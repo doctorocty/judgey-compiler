@@ -7,8 +7,8 @@ from compiler import compile_code
 
 
 app = Flask(__name__)
-
-CORS(app)
+FRONTEND_ORIGIN = os.environ.get("FRONTEND_ORIGIN", "*")
+CORS(app, resources={r"/compile": {"origins": FRONTEND_ORIGIN}})
 
 
 BASE_DIR = os.path.dirname(

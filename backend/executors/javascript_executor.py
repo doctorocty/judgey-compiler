@@ -1,7 +1,10 @@
 import subprocess
-import tempfile
 import os
 import json
+import shutil
+import tempfile
+
+from backend.executors.sandbox import limit_resources_no_address_space
 
 PROJECT_DIR = os.path.dirname(
     os.path.dirname(
@@ -11,31 +14,34 @@ PROJECT_DIR = os.path.dirname(
     )
 )
 
+NODE_PATH = shutil.which("node") or "node"
+
 ESLINT_PATH = os.path.join(
     PROJECT_DIR,
     "node_modules",
-    ".bin",
-    "eslint.cmd"
+    "eslint",
+    "bin",
+    "eslint.js"
 )
+
 
 def analyze_javascript(code):
     temp_file = None
 
     try:
-        temp_file = os.path.join(
-            PROJECT_DIR,
-            ".judgy_temp.js"
+        handle, temp_file = tempfile.mkstemp(
+            suffix=".js",
+            prefix="judgy_lint_"
         )
 
-        with open(
-            temp_file,
-            "w",
-            encoding="utf-8"
-        ) as file:
+        os.close(handle)
+
+        with open(temp_file, "w", encoding="utf-8") as file:
             file.write(code)
 
         result = subprocess.run(
             [
+                NODE_PATH,
                 ESLINT_PATH,
                 temp_file,
                 "--no-config-lookup",
@@ -48,32 +54,40 @@ def analyze_javascript(code):
             ],
             capture_output=True,
             text=True,
-            timeout=10,
-            cwd=PROJECT_DIR
+            timeout=30,
+            cwd=os.path.dirname(temp_file)
         )
 
-        if not result.stdout.strip():
+        output = result.stdout.strip()
+
+        if not output:
             if result.stderr.strip():
                 return [{
                     "line": 1,
                     "column": 1,
                     "message": result.stderr.strip()
                 }]
-
             return []
 
-        data = json.loads(result.stdout)
+        data = json.loads(output)
 
         if not data:
             return []
 
         return data[0].get("messages", [])
 
+    except subprocess.TimeoutExpired:
+        return [{
+            "line": 1,
+            "column": 1,
+            "message": "JavaScript analysis timed out."
+        }]
+
     except Exception as error:
         return [{
             "line": 1,
             "column": 1,
-            "message": f"JavaScript analyzer error: {error}"
+            "message": str(error)
         }]
 
     finally:
@@ -93,10 +107,7 @@ def run_javascript(code):
             for issue in issues:
                 line = issue.get("line", "?")
                 column = issue.get("column", "?")
-                message = issue.get(
-                    "message",
-                    "Unknown error"
-                )
+                message = issue.get("message", "Unknown error")
 
                 error_messages.append(
                     f"Line {line}, Column {column}: {message}"
@@ -109,27 +120,28 @@ def run_javascript(code):
                 "errors": len(issues)
             }
 
-        temp_file = os.path.join(
-            PROJECT_DIR,
-            ".judgy_run.js"
+        handle, temp_file = tempfile.mkstemp(
+            suffix=".js",
+            prefix="judgy_run_"
         )
 
-        with open(
-            temp_file,
-            "w",
-            encoding="utf-8"
-        ) as file:
+        os.close(handle)
+
+        with open(temp_file, "w", encoding="utf-8") as file:
             file.write(code)
 
         result = subprocess.run(
             [
-                "node",
+                NODE_PATH,
+                "--max-old-space-size=192",
                 temp_file
             ],
             capture_output=True,
             text=True,
             timeout=5,
-            cwd=PROJECT_DIR
+            cwd=tempfile.gettempdir(),
+            stdin=subprocess.DEVNULL,
+            preexec_fn=limit_resources_no_address_space
         )
 
         if result.returncode == 0:
