@@ -3,7 +3,7 @@ FROM node:22-bookworm-slim
 ENV PYTHONUNBUFFERED=1 PIP_NO_CACHE_DIR=1 PIP_BREAK_SYSTEM_PACKAGES=1
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-        python3 python3-pip gcc libc6-dev g++ \
+                python3 python3-pip gcc libc6-dev g++ default-jdk-headless \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
