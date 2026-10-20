@@ -1,0 +1,202 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html,
+body {
+    width: 100%;
+    height: 100%;
+}
+
+body {
+    overflow: hidden;
+    font-family: Arial, Helvetica, sans-serif;
+    background-image: url("/pictures/picture-1.png");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.compiler {
+    position: absolute;
+    right: 35px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 540px;
+    height: 520px;
+    padding: 22px;
+    background: rgba(10, 15, 18, 0.86);
+    border: 2px solid rgba(255, 255, 255, 0.75);
+    border-radius: 14px;
+    color: white;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55);
+    overflow: hidden;
+}
+
+.compiler-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 15px;
+}
+
+.compiler-header h1 {
+    font-size: 24px;
+    letter-spacing: 2px;
+}
+
+.compiler-header p {
+    margin-top: 5px;
+    font-size: 12px;
+    opacity: 0.8;
+}
+
+.error-counter {
+    padding: 8px 10px;
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.toolbar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+#language {
+    flex: 1;
+    padding: 9px;
+    border: none;
+    border-radius: 6px;
+    background: white;
+    color: black;
+    font-size: 14px;
+}
+
+#runButton {
+    padding: 9px 18px;
+    border: none;
+    border-radius: 6px;
+    background: white;
+    color: black;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+#runButton:hover {
+    opacity: 0.8;
+}
+
+#editor {
+    width: 100%;
+    height: 220px;
+    overflow: hidden;
+    border-radius: 7px;
+    background: #111;
+}
+
+.cm-editor {
+    height: 100%;
+    max-height: 100%;
+    color: #f8f8f2;
+    background: #111318;
+    font-family: "Courier New", monospace;
+    font-size: 14px;
+}
+
+.cm-scroller {
+    overflow: auto !important;
+}
+
+.cm-line {
+    color: #f8f8f2;
+}
+
+.cm-editor.cm-focused {
+    outline: none;
+}
+
+.cm-content {
+    padding: 14px;
+}
+
+.cm-gutters {
+    background: #111;
+    border-right: 1px solid #333;
+}
+
+.output {
+    margin-top: 12px;
+    padding: 12px;
+    border-radius: 7px;
+    background: #111;
+    height: 190px;
+    overflow: hidden;
+}
+
+.output-title {
+    margin-bottom: 7px;
+    font-size: 11px;
+    font-weight: bold;
+    opacity: 0.6;
+}
+
+#outputText {
+    height: 145px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    white-space: pre-wrap;
+    font-family: "Courier New", monospace;
+    font-size: 13px;
+}
+
+.volume-button {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 46px;
+    height: 46px;
+    padding: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    border-radius: 50%;
+    background: rgba(15, 18, 20, 0.75);
+    color: white;
+    cursor: pointer;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(8px);
+    transition:
+        transform 0.2s ease,
+        background 0.2s ease;
+}
+
+.volume-button svg {
+    width: 22px;
+    height: 22px;
+}
+
+.volume-button:hover {
+    transform: scale(1.08);
+    background: rgba(15, 18, 20, 0.9);
+}
+
+.volume-button:active {
+    transform: scale(0.95);
+}
+
+#backgroundLayer {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    opacity: 1;
+    transition: opacity 0.7s ease;
+}

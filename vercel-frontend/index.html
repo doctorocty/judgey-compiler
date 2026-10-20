@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Judgey Compiler</title>
+
+    <link rel="stylesheet" href="/style.css">
+</head>
+
+<body>
+
+    <div id="backgroundLayer"></div>
+
+    <button id="volumeButton" class="volume-button" aria-label="Toggle sound">
+
+    <svg
+        id="volumeOnIcon"
+        viewBox="0 0 24 24"
+        aria-hidden="true"
+    >
+        <path
+            d="M11 5L6 9H2v6h4l5 4V5z"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linejoin="round"
+        />
+
+        <path
+            d="M15.5 8.5a5 5 0 0 1 0 7"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+        />
+
+        <path
+            d="M18.5 5.5a9 9 0 0 1 0 13"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+        />
+    </svg>
+
+
+    <svg
+        id="volumeOffIcon"
+        viewBox="0 0 24 24"
+        aria-hidden="true"
+        style="display: none;"
+    >
+        <path
+            d="M11 5L6 9H2v6h4l5 4V5z"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linejoin="round"
+        />
+
+        <path
+            d="M23 9l-6 6"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+        />
+
+        <path
+            d="M17 9l6 6"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+        />
+    </svg>
+
+</button>
+
+    <main class="compiler">
+
+        <div class="compiler-header">
+
+            <div>
+                <h1>JUDEGY COMPILER</h1>
+
+                <p>
+                    Let's see how good your code really is...
+                </p>
+            </div>
+
+            <div class="error-counter">
+                ERRORS:
+                <span id="errorCount">0</span>
+            </div>
+
+        </div>
+
+        <div class="toolbar">
+
+            <select id="language">
+
+                <option value="python">
+                    Python
+                </option>
+
+                <option value="javascript">
+                    JavaScript
+                </option>
+
+                <option value="c">
+                    C
+                </option>
+
+                <option value="cpp">
+                    C++
+                </option>
+
+                <option value="java">
+                    Java
+                </option>
+
+            </select>
+
+
+            <button id="runButton">
+                RUN CODE
+            </button>
+
+        </div>
+
+        <div id="editor"></div>
+
+        <div class="output">
+
+            <div class="output-title">
+                OUTPUT
+            </div>
+
+            <pre id="outputText">Your output will appear here...</pre>
+
+        </div>
+
+    </main>
+
+    <script type="module" src="/script.js"></script>
+
+</body>
+
+</html>
