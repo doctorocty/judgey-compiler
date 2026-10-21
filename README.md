@@ -34,7 +34,7 @@ g++ --version
 javac --version
 
 Then start the compiler:
-python app.py
+flask --app app run --debug
 Open the local URL shown in your terminal.
 Docker
 You can also run it with Docker:
