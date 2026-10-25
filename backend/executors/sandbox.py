@@ -12,7 +12,6 @@ def make_limiter(address_space=MEMORY_BYTES):
         if address_space is not None:
             resource.setrlimit(resource.RLIMIT_AS, (address_space, address_space))
         resource.setrlimit(resource.RLIMIT_FSIZE, (FILE_SIZE_BYTES, FILE_SIZE_BYTES))
-        resource.setrlimit(resource.RLIMIT_NPROC, (MAX_PROCESSES, MAX_PROCESSES))
         resource.setrlimit(resource.RLIMIT_CORE, (0, 0))
     return limit_resources
 
